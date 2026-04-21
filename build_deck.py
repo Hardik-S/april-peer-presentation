@@ -28,22 +28,28 @@ SLIDE_WIDTH = Inches(13.333)
 SLIDE_HEIGHT = Inches(7.5)
 WORDS_PER_MINUTE = 130
 
-NAVY = RGBColor(16, 38, 68)
-INK = RGBColor(30, 37, 46)
-SLATE = RGBColor(78, 91, 108)
-TEAL = RGBColor(33, 132, 142)
-TEAL_SOFT = RGBColor(222, 241, 241)
-GOLD = RGBColor(223, 169, 59)
-GOLD_SOFT = RGBColor(250, 239, 209)
-RED = RGBColor(177, 70, 64)
-RED_SOFT = RGBColor(248, 229, 225)
-GREEN = RGBColor(57, 140, 101)
-GREEN_SOFT = RGBColor(230, 244, 235)
-BLUE_SOFT = RGBColor(232, 239, 249)
-BG = RGBColor(248, 246, 239)
+NAVY = RGBColor(70, 44, 119)
+INK = RGBColor(18, 18, 18)
+SLATE = RGBColor(84, 84, 92)
+TEAL = RGBColor(50, 127, 147)
+TEAL_SOFT = RGBColor(229, 244, 247)
+GOLD = RGBColor(168, 125, 42)
+GOLD_SOFT = RGBColor(249, 242, 213)
+RED = RGBColor(165, 65, 63)
+RED_SOFT = RGBColor(249, 228, 226)
+GREEN = RGBColor(54, 135, 86)
+GREEN_SOFT = RGBColor(231, 244, 235)
+BLUE_SOFT = RGBColor(238, 241, 246)
+BG = RGBColor(255, 255, 255)
 WHITE = RGBColor(255, 255, 255)
+PURPLE = RGBColor(94, 48, 151)
+PURPLE_LIGHT = RGBColor(197, 181, 219)
+HEADER_GRAY = RGBColor(244, 244, 244)
+PANEL_GRAY = RGBColor(247, 247, 247)
+RULE = RGBColor(158, 158, 166)
+BULLET = RGBColor(49, 72, 160)
 
-TITLE_FONT = "Bahnschrift"
+TITLE_FONT = "Aptos Display"
 BODY_FONT = "Aptos"
 MONO_FONT = "Consolas"
 
@@ -64,6 +70,12 @@ def color(name: str) -> RGBColor:
         "blue_soft": BLUE_SOFT,
         "bg": BG,
         "white": WHITE,
+        "purple": PURPLE,
+        "purple_light": PURPLE_LIGHT,
+        "header_gray": HEADER_GRAY,
+        "panel_gray": PANEL_GRAY,
+        "rule": RULE,
+        "bullet": BULLET,
     }[name]
 
 
@@ -92,23 +104,23 @@ def add_text_box(slide, left, top, width, height, paragraphs, *, margin=0.05, ve
 
 
 def add_card(slide, left, top, width, height, fill_name, *, line_name=None, rounded=True):
-    shape_type = MSO_AUTO_SHAPE_TYPE.ROUNDED_RECTANGLE if rounded else MSO_AUTO_SHAPE_TYPE.RECTANGLE
+    shape_type = MSO_AUTO_SHAPE_TYPE.RECTANGLE if not rounded else MSO_AUTO_SHAPE_TYPE.RECTANGLE
     shape = slide.shapes.add_shape(shape_type, Inches(left), Inches(top), Inches(width), Inches(height))
     shape.fill.solid()
     shape.fill.fore_color.rgb = color(fill_name)
-    shape.line.color.rgb = color(line_name or fill_name)
-    shape.line.width = Pt(1.1)
+    shape.line.color.rgb = color(line_name or "rule")
+    shape.line.width = Pt(0.65)
     return shape
 
 
-def add_chip(slide, text, left, top, width, fill_name="navy", *, text_name="white", font_size=10):
-    add_card(slide, left, top, width, 0.34, fill_name)
+def add_chip(slide, text, left, top, width, fill_name="purple", *, text_name="white", font_size=8):
+    add_card(slide, left, top, width, 0.22, fill_name, line_name=fill_name, rounded=False)
     add_text_box(
         slide,
-        left + 0.08,
-        top + 0.08,
+        left + 0.04,
+        top + 0.035,
         width - 0.16,
-        0.16,
+        0.12,
         [{"text": text, "size": font_size, "bold": True, "color": text_name, "align": PP_ALIGN.CENTER}],
         margin=0.0,
         vertical_anchor=MSO_ANCHOR.MIDDLE,
@@ -119,41 +131,44 @@ def add_background(slide):
     fill = slide.background.fill
     fill.solid()
     fill.fore_color.rgb = BG
-    rail = slide.shapes.add_shape(MSO_AUTO_SHAPE_TYPE.RECTANGLE, 0, 0, Inches(0.18), SLIDE_HEIGHT)
-    rail.fill.solid()
-    rail.fill.fore_color.rgb = NAVY
-    rail.line.fill.background()
-    accent = slide.shapes.add_shape(MSO_AUTO_SHAPE_TYPE.RECTANGLE, Inches(0.18), 0, Inches(0.08), SLIDE_HEIGHT)
-    accent.fill.solid()
-    accent.fill.fore_color.rgb = GOLD
-    accent.line.fill.background()
+    top = slide.shapes.add_shape(MSO_AUTO_SHAPE_TYPE.RECTANGLE, 0, 0, SLIDE_WIDTH, Inches(0.08))
+    top.fill.solid()
+    top.fill.fore_color.rgb = PURPLE
+    top.line.fill.background()
+    band = slide.shapes.add_shape(MSO_AUTO_SHAPE_TYPE.RECTANGLE, 0, Inches(0.08), SLIDE_WIDTH, Inches(0.28))
+    band.fill.solid()
+    band.fill.fore_color.rgb = HEADER_GRAY
+    band.line.fill.background()
 
 
 def add_headline(slide, title, label):
-    add_text_box(slide, 0.72, 0.58, 9.8, 0.72, [{"text": title, "size": 28, "bold": True, "color": "navy"}], margin=0.0)
-    add_chip(slide, label, 10.68, 0.74, 1.95, "teal", font_size=9)
+    add_chip(slide, label, 5.35, 0.01, 2.65, "purple", font_size=7)
+    add_text_box(slide, 0.26, 0.45, 11.8, 0.38, [{"text": title, "size": 18, "bold": False, "color": "purple"}], margin=0.0)
+    rule = slide.shapes.add_shape(MSO_AUTO_SHAPE_TYPE.RECTANGLE, Inches(0.25), Inches(0.88), Inches(12.85), Inches(0.012))
+    rule.fill.solid()
+    rule.fill.fore_color.rgb = PURPLE_LIGHT
+    rule.line.fill.background()
 
 
 def add_takeaway(slide, text, *, fill_name="gold_soft", line_name="gold"):
-    add_card(slide, 0.78, 6.13, 11.85, 0.6, fill_name, line_name=line_name)
+    line = slide.shapes.add_shape(MSO_AUTO_SHAPE_TYPE.RECTANGLE, Inches(0.25), Inches(6.37), Inches(12.85), Inches(0.015))
+    line.fill.solid()
+    line.fill.fore_color.rgb = RULE
+    line.line.fill.background()
     add_text_box(
         slide,
-        1.0,
-        6.31,
-        11.4,
-        0.18,
-        [{"text": text, "size": 14, "bold": True, "color": "navy", "align": PP_ALIGN.CENTER}],
+        0.34,
+        6.52,
+        12.4,
+        0.32,
+        [{"text": text, "size": 12, "bold": True, "color": "ink", "align": PP_ALIGN.LEFT}],
         margin=0.0,
         vertical_anchor=MSO_ANCHOR.MIDDLE,
     )
 
 
 def add_footer(slide, number):
-    line = slide.shapes.add_shape(MSO_AUTO_SHAPE_TYPE.RECTANGLE, Inches(0.72), Inches(6.92), Inches(11.8), Inches(0.02))
-    line.fill.solid()
-    line.fill.fore_color.rgb = TEAL
-    line.line.fill.background()
-    add_text_box(slide, 11.8, 6.98, 0.75, 0.2, [{"text": f"{number:02d}", "size": 9, "color": "slate", "align": PP_ALIGN.RIGHT}], margin=0.0)
+    add_text_box(slide, 12.18, 7.12, 0.82, 0.16, [{"text": f"{number} of 20", "size": 6.5, "color": "slate", "align": PP_ALIGN.RIGHT}], margin=0.0)
 
 
 def add_notes(slide, text):
@@ -161,23 +176,21 @@ def add_notes(slide, text):
 
 
 def bullet_paragraphs(items, *, size=18, color_name="ink"):
-    return [{"text": item, "size": size, "color": color_name, "space_after": 8} for item in items]
+    return [{"text": f"●  {item}", "size": size, "color": color_name, "space_after": 6} for item in items]
 
 
 def render_title(prs, number, spec):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     fill = slide.background.fill
     fill.solid()
-    fill.fore_color.rgb = NAVY
-    bar = slide.shapes.add_shape(MSO_AUTO_SHAPE_TYPE.RECTANGLE, 0, 0, SLIDE_WIDTH, Inches(0.2))
-    bar.fill.solid()
-    bar.fill.fore_color.rgb = GOLD
-    bar.line.fill.background()
-    add_text_box(slide, 0.78, 1.15, 10.9, 1.15, [{"text": spec["title"], "size": 35, "bold": True, "color": "white"}], margin=0.0)
-    add_text_box(slide, 0.8, 2.55, 8.8, 0.52, [{"text": spec["subtitle"], "size": 17, "color": "gold_soft"}], margin=0.0)
-    add_card(slide, 0.82, 4.0, 5.4, 1.1, "teal")
-    add_text_box(slide, 1.08, 4.28, 4.88, 0.42, [{"text": spec["claim"], "size": 18, "bold": True, "color": "white", "align": PP_ALIGN.CENTER}], margin=0.0, vertical_anchor=MSO_ANCHOR.MIDDLE)
-    add_chip(slide, "Adam's structure + Hardik's Maple content", 7.2, 4.25, 4.8, "white", text_name="navy", font_size=12)
+    fill.fore_color.rgb = WHITE
+    add_background(slide)
+    add_text_box(slide, 0.55, 1.15, 12.2, 0.55, [{"text": spec["title"], "size": 18, "bold": False, "color": "purple", "align": PP_ALIGN.CENTER}], margin=0.0)
+    add_text_box(slide, 0.55, 1.85, 12.2, 0.35, [{"text": spec["subtitle"], "size": 11, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
+    add_text_box(slide, 0.55, 2.45, 12.2, 0.32, [{"text": "Hardik S.  |  Department of Computer Science  |  Western University", "size": 9, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
+    add_card(slide, 4.1, 3.72, 5.1, 0.44, "panel_gray", line_name="rule", rounded=False)
+    add_text_box(slide, 4.22, 3.86, 4.86, 0.16, [{"text": spec["claim"], "size": 9.5, "bold": True, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0, vertical_anchor=MSO_ANCHOR.MIDDLE)
+    add_text_box(slide, 4.05, 4.6, 5.2, 0.2, [{"text": "Adam: visual reference only.  Hardik: Maple content source.", "size": 7.8, "color": "slate", "align": PP_ALIGN.CENTER}], margin=0.0)
     add_notes(slide, spec["script"])
     add_footer(slide, number)
 
@@ -187,11 +200,11 @@ def render_roadmap(prs, number, spec):
     add_background(slide)
     add_headline(slide, spec["title"], "Talk Map")
     for idx, step in enumerate(spec["steps"]):
-        left = 0.82 + idx * 3.1
-        add_card(slide, left, 2.0, 2.72, 2.75, step["fill"], line_name=step["line"])
-        add_text_box(slide, left + 0.22, 2.28, 2.28, 0.42, [{"text": step["name"], "size": 18, "bold": True, "color": "navy", "align": PP_ALIGN.CENTER}], margin=0.0)
-        add_text_box(slide, left + 0.23, 3.02, 2.25, 0.82, [{"text": step["detail"], "size": 13, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
-        add_chip(slide, step["tag"], left + 0.3, 4.12, 2.1, "navy", font_size=9)
+        left = 0.65 + idx * 3.12
+        add_card(slide, left, 1.78, 2.72, 2.15, step["fill"], line_name=step["line"], rounded=False)
+        add_text_box(slide, left + 0.18, 2.02, 2.36, 0.28, [{"text": step["name"], "size": 12.5, "bold": True, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
+        add_text_box(slide, left + 0.2, 2.52, 2.32, 0.62, [{"text": step["detail"], "size": 9.2, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
+        add_chip(slide, step["tag"], left + 0.46, 3.34, 1.82, "purple", font_size=6.5)
     add_takeaway(slide, spec["takeaway"])
     add_notes(slide, spec["script"])
     add_footer(slide, number)
@@ -201,14 +214,14 @@ def render_two_column(prs, number, spec):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_background(slide)
     add_headline(slide, spec["title"], spec.get("label", "Technical Core"))
-    add_card(slide, 0.86, 1.72, 5.78, 3.78, spec.get("left_fill", "white"), line_name=spec.get("left_line", "navy"))
-    add_card(slide, 6.95, 1.72, 5.64, 3.78, spec.get("right_fill", "teal_soft"), line_name=spec.get("right_line", "teal"))
-    add_text_box(slide, 1.15, 1.98, 5.18, 0.35, [{"text": spec["left_title"], "size": 18, "bold": True, "color": "navy"}], margin=0.0)
-    add_text_box(slide, 7.23, 1.98, 5.08, 0.35, [{"text": spec["right_title"], "size": 18, "bold": True, "color": "navy"}], margin=0.0)
-    add_text_box(slide, 1.14, 2.55, 5.1, 2.25, bullet_paragraphs(spec["left"], size=15), margin=0.0)
-    add_text_box(slide, 7.22, 2.55, 5.05, 2.25, bullet_paragraphs(spec["right"], size=15), margin=0.0)
+    add_card(slide, 0.58, 1.42, 5.95, 4.25, spec.get("left_fill", "white"), line_name=spec.get("left_line", "rule"), rounded=False)
+    add_card(slide, 6.82, 1.42, 5.95, 4.25, spec.get("right_fill", "panel_gray"), line_name=spec.get("right_line", "rule"), rounded=False)
+    add_text_box(slide, 0.82, 1.68, 5.4, 0.3, [{"text": spec["left_title"], "size": 12.5, "bold": True, "color": "ink"}], margin=0.0)
+    add_text_box(slide, 7.06, 1.68, 5.42, 0.3, [{"text": spec["right_title"], "size": 12.5, "bold": True, "color": "ink"}], margin=0.0)
+    add_text_box(slide, 0.86, 2.2, 5.25, 2.6, bullet_paragraphs(spec["left"], size=10.6), margin=0.0)
+    add_text_box(slide, 7.1, 2.2, 5.25, 2.6, bullet_paragraphs(spec["right"], size=10.6), margin=0.0)
     if spec.get("chip"):
-        add_chip(slide, spec["chip"], 4.35, 5.42, 4.6, "gold", font_size=10)
+        add_chip(slide, spec["chip"], 4.68, 5.35, 4.0, "purple", font_size=6.8)
     add_takeaway(slide, spec["takeaway"], fill_name=spec.get("takeaway_fill", "gold_soft"))
     add_notes(slide, spec["script"])
     add_footer(slide, number)
@@ -219,13 +232,13 @@ def render_pipeline(prs, number, spec):
     add_background(slide)
     add_headline(slide, spec["title"], "Pipeline")
     for idx, node in enumerate(spec["nodes"]):
-        left = 0.78 + idx * 2.45
-        add_card(slide, left, 2.35, 1.78, 1.08, node["fill"], line_name=node["line"])
-        add_text_box(slide, left + 0.13, 2.68, 1.52, 0.28, [{"text": node["name"], "size": 13, "bold": True, "color": "navy", "align": PP_ALIGN.CENTER}], margin=0.0, vertical_anchor=MSO_ANCHOR.MIDDLE)
+        left = 0.78 + idx * 2.42
+        add_card(slide, left, 2.12, 1.68, 0.5, node["fill"], line_name=node["line"], rounded=False)
+        add_text_box(slide, left + 0.1, 2.29, 1.48, 0.12, [{"text": node["name"], "size": 7.5, "bold": True, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0, vertical_anchor=MSO_ANCHOR.MIDDLE)
         if idx < len(spec["nodes"]) - 1:
-            add_text_box(slide, left + 1.88, 2.72, 0.42, 0.2, [{"text": "->", "size": 18, "bold": True, "color": "teal", "align": PP_ALIGN.CENTER}], margin=0.0)
-    add_card(slide, 1.06, 4.35, 11.0, 0.8, "white", line_name="navy")
-    add_text_box(slide, 1.33, 4.58, 10.45, 0.24, [{"text": spec["detail"], "size": 15, "bold": True, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
+            add_text_box(slide, left + 1.82, 2.25, 0.42, 0.14, [{"text": "→", "size": 13, "bold": True, "color": "purple", "align": PP_ALIGN.CENTER}], margin=0.0)
+    add_card(slide, 1.0, 4.1, 11.15, 0.55, "panel_gray", line_name="rule", rounded=False)
+    add_text_box(slide, 1.24, 4.28, 10.72, 0.16, [{"text": spec["detail"], "size": 9.8, "bold": True, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
     add_takeaway(slide, spec["takeaway"])
     add_notes(slide, spec["script"])
     add_footer(slide, number)
@@ -235,11 +248,11 @@ def render_code(prs, number, spec):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_background(slide)
     add_headline(slide, spec["title"], spec.get("label", "Pseudocode"))
-    add_card(slide, 0.9, 1.72, 7.2, 3.96, "blue_soft", line_name="navy", rounded=False)
-    add_text_box(slide, 1.12, 1.98, 6.72, 3.42, [{"text": spec["code"], "size": spec.get("code_size", 14), "font": MONO_FONT, "color": "ink", "space_after": 0}], margin=0.0)
-    add_card(slide, 8.46, 1.72, 3.98, 3.96, "white", line_name="teal")
-    add_text_box(slide, 8.74, 2.0, 3.42, 0.34, [{"text": spec["side_title"], "size": 17, "bold": True, "color": "navy"}], margin=0.0)
-    add_text_box(slide, 8.72, 2.55, 3.45, 2.0, bullet_paragraphs(spec["side"], size=14), margin=0.0)
+    add_card(slide, 0.72, 1.36, 7.6, 4.4, "blue_soft", line_name="rule", rounded=False)
+    add_text_box(slide, 0.96, 1.63, 7.06, 3.84, [{"text": spec["code"], "size": spec.get("code_size", 10.2), "font": MONO_FONT, "color": "ink", "space_after": 0}], margin=0.0)
+    add_card(slide, 8.62, 1.36, 3.9, 4.4, "white", line_name="rule", rounded=False)
+    add_text_box(slide, 8.88, 1.72, 3.34, 0.28, [{"text": spec["side_title"], "size": 12.5, "bold": True, "color": "ink"}], margin=0.0)
+    add_text_box(slide, 8.88, 2.28, 3.3, 2.35, bullet_paragraphs(spec["side"], size=10.2), margin=0.0)
     add_takeaway(slide, spec["takeaway"])
     add_notes(slide, spec["script"])
     add_footer(slide, number)
@@ -249,13 +262,15 @@ def render_metrics(prs, number, spec):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_background(slide)
     add_headline(slide, spec["title"], "Evidence")
+    headers = ["Input", "Result", "Comparison"]
     for idx, metric in enumerate(spec["metrics"]):
-        left = 0.92 + idx * 3.9
-        add_card(slide, left, 2.08, 3.34, 1.62, metric["fill"], line_name=metric["line"])
-        add_text_box(slide, left + 0.18, 2.36, 2.98, 0.42, [{"text": metric["value"], "size": 24, "bold": True, "color": "navy", "align": PP_ALIGN.CENTER}], margin=0.0)
-        add_text_box(slide, left + 0.24, 3.04, 2.86, 0.28, [{"text": metric["label"], "size": 12, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
-    add_card(slide, 1.0, 4.35, 11.1, 0.8, "white", line_name="navy")
-    add_text_box(slide, 1.28, 4.58, 10.55, 0.24, [{"text": spec["detail"], "size": 15, "bold": True, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
+        left = 0.72 + idx * 4.08
+        add_card(slide, left, 1.66, 3.68, 1.48, metric["fill"], line_name="rule", rounded=False)
+        add_text_box(slide, left + 0.14, 1.84, 3.4, 0.18, [{"text": headers[idx], "size": 8.2, "bold": True, "color": "purple", "align": PP_ALIGN.CENTER}], margin=0.0)
+        add_text_box(slide, left + 0.18, 2.2, 3.3, 0.28, [{"text": metric["value"], "size": 16.5, "bold": True, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
+        add_text_box(slide, left + 0.24, 2.68, 3.18, 0.22, [{"text": metric["label"], "size": 7.8, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
+    add_card(slide, 1.0, 4.18, 11.1, 0.55, "panel_gray", line_name="rule", rounded=False)
+    add_text_box(slide, 1.28, 4.36, 10.55, 0.16, [{"text": spec["detail"], "size": 9.5, "bold": True, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
     add_takeaway(slide, spec["takeaway"])
     add_notes(slide, spec["script"])
     add_footer(slide, number)
@@ -265,16 +280,14 @@ def render_close(prs, number, spec):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     fill = slide.background.fill
     fill.solid()
-    fill.fore_color.rgb = NAVY
-    bar = slide.shapes.add_shape(MSO_AUTO_SHAPE_TYPE.RECTANGLE, 0, 0, SLIDE_WIDTH, Inches(0.2))
-    bar.fill.solid()
-    bar.fill.fore_color.rgb = GOLD
-    bar.line.fill.background()
-    add_text_box(slide, 0.78, 1.05, 11.2, 0.8, [{"text": spec["title"], "size": 33, "bold": True, "color": "white"}], margin=0.0)
-    add_text_box(slide, 0.82, 2.2, 10.6, 0.8, [{"text": spec["claim"], "size": 21, "bold": True, "color": "gold_soft"}], margin=0.0)
+    fill.fore_color.rgb = WHITE
+    add_background(slide)
+    add_text_box(slide, 0.55, 1.12, 11.8, 0.42, [{"text": spec["title"], "size": 18, "bold": False, "color": "purple"}], margin=0.0)
+    add_text_box(slide, 0.58, 2.08, 11.7, 0.55, [{"text": spec["claim"], "size": 12.5, "bold": True, "color": "ink"}], margin=0.0)
     for idx, chip in enumerate(spec["chips"]):
-        add_chip(slide, chip, 1.0 + idx * 3.95, 4.25, 3.35, "white", text_name="navy", font_size=11)
-    add_text_box(slide, 0.82, 6.08, 3.0, 0.3, [{"text": "Thank you.", "size": 18, "bold": True, "color": "white"}], margin=0.0)
+        add_card(slide, 1.0 + idx * 3.95, 4.25, 3.35, 0.28, "panel_gray", line_name="rule", rounded=False)
+        add_text_box(slide, 1.1 + idx * 3.95, 4.34, 3.15, 0.1, [{"text": chip, "size": 7.8, "bold": True, "color": "ink", "align": PP_ALIGN.CENTER}], margin=0.0)
+    add_text_box(slide, 0.82, 6.08, 3.0, 0.22, [{"text": "Thank you.", "size": 9.5, "bold": True, "color": "ink"}], margin=0.0)
     add_notes(slide, spec["script"])
     add_footer(slide, number)
 
@@ -655,7 +668,21 @@ def write_review_docs(slides: list[dict], exported_pngs: bool, contact_sheet: bo
     mapping = [
         "# Adam Structure Mapping",
         "",
-        "Adam is used for presentation architecture only. Hardik's Maple technical defense is the content source.",
+        "Adam is the visual/style reference only. Hardik's Maple technical defense is the authoritative content source.",
+        "",
+        "The generated deck remains editable PowerPoint: titles, bullets, code blocks, diagrams, tables, chips, and footers are native slide objects rather than pasted full-slide screenshots.",
+        "",
+        "## Inferred Adam Visual System",
+        "",
+        "- Canvas: widescreen landscape slides, approximated as 16:9.",
+        "- Background: mostly white with a light gray title band and a thin purple top rule.",
+        "- Title placement: compact, top-left, purple, with a small centered purple section tab.",
+        "- Font feel: plain academic sans-serif; small titles and dense 8-12 pt body text rather than large keynote typography.",
+        "- Density: high information density, with bullets, pseudocode, equations, tables, and small diagrams sharing the slide.",
+        "- Palette: purple/lavender structure, black text, light gray panels, sparse teal/gold/green only for semantic contrast.",
+        "- Borders and boxes: thin square-line boxes; minimal rounded-card treatment.",
+        "- Footer/header: section label in the top band and small slide count in the lower-right corner.",
+        "- Whitespace: moderate but not decorative; content starts close to the header and uses broad horizontal space.",
         "",
         "| Adam-style role | April deck slides | Hardik content mapped into that role |",
         "| --- | --- | --- |",
@@ -666,6 +693,8 @@ def write_review_docs(slides: list[dict], exported_pngs: bool, contact_sheet: bo
         "| Worked example | 12-14 | heat_eq and public command surface from the technical defense. |",
         "| Evidence | 15-16 | Frozen bundle, strict-improvement cases, control cases. |",
         "| Lessons, limits, future work | 17-20 | Scope boundaries, lessons, extensions, closing claim. |",
+        "",
+        "Visual match statement: the April deck now follows Adam's screenshots as closely as practical while preserving Hardik's Maple thesis substance.",
         "",
         f"Usable Adam screenshots copied: {len(adam_screens)}",
         "Excluded corrupt screenshot: `Screenshot 2026-04-17 094616.png`",
@@ -680,9 +709,10 @@ def write_review_docs(slides: list[dict], exported_pngs: bool, contact_sheet: bo
         "## What changed",
         "",
         "- Created a fresh April peer deck outside the Maple repo.",
-        "- Used Adam's work for structure, pacing, and slide rhythm only.",
-        "- Used Hardik's current technical defense content as the authoritative Maple source.",
+        "- Used Adam's screenshots as the visual/style reference: white academic canvas, purple header bands, compact titles, square thin-line boxes, dense bullets/code/tables, and understated footers.",
+        "- Used Hardik's current technical defense content as the authoritative Maple source; Adam's hypergraph topic was not imported.",
         "- Generated editable PowerPoint slides rather than screenshot-only slides.",
+        "- Preserved the Adam-like technical structure: setup, model/representation, algorithm walkthrough, backend, worked example, comparison, evidence, limits, and future work.",
         "",
         "## Timing",
         "",
@@ -699,6 +729,8 @@ def write_review_docs(slides: list[dict], exported_pngs: bool, contact_sheet: bo
         "",
         "## Boundary",
         "",
+        "Adam is the style reference. Hardik is the content source. The slides remain editable PowerPoint objects. The deck visually matches Adam's screenshots as closely as practical without changing the Maple thesis substance.",
+        "",
         "The Maple repo was not modified. Final import into Maple remains out of scope until explicit approval.",
     ]
     REVIEW_MEMO.write_text("\n".join(memo), encoding="utf-8")
@@ -707,10 +739,13 @@ def write_review_docs(slides: list[dict], exported_pngs: bool, contact_sheet: bo
         "# Review Checklist",
         "",
         "- [x] Adam is used for structure, not content.",
+        "- [x] Adam is explicitly documented as the visual/style reference.",
         "- [x] Hardik's technical defense content is the authoritative substance.",
+        "- [x] Hardik is explicitly documented as the content source.",
         "- [x] Omar's work is not used as deck basis.",
         "- [x] Adam's corrupt zero-byte screenshot is excluded.",
         "- [x] Slides are editable PowerPoint objects.",
+        "- [x] Slides visually match Adam's screenshots as closely as practical while keeping Maple content.",
         "- [x] Claims stay inside the validated Maple evidence described in the technical defense.",
         f"- [{'x' if 20 <= estimated_time <= 25 else ' '}] Talk fits roughly 20-25 minutes at normal speaking pace.",
         f"- [{'x' if exported_pngs else ' '}] Exported PNGs were generated.",

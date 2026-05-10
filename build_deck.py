@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import re
 import subprocess
 from pathlib import Path
@@ -784,7 +785,26 @@ def write_review_docs(slides: list[dict], exported_pngs: bool, contact_sheet: bo
     REVIEW_CHECKLIST.write_text("\n".join(checklist), encoding="utf-8")
 
 
-def main() -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Build the April peer presentation deck artifacts.")
+    parser.add_argument(
+        "--skip-png-export",
+        action="store_true",
+        help="skip PowerPoint COM PNG export and build only the editable deck, script, and review docs",
+    )
+    parser.add_argument(
+        "--skip-contact-sheet",
+        action="store_true",
+        help="skip contact sheet generation even when slide PNGs are available",
+    )
+    options = parser.parse_args(argv)
+    if options.skip_png_export:
+        options.skip_contact_sheet = True
+    return options
+
+
+def main(argv: list[str] | None = None) -> None:
+    options = parse_args(argv)
     DECK_DIR.mkdir(exist_ok=True)
     REVIEW_DIR.mkdir(exist_ok=True)
     slides = build_slides()
@@ -794,8 +814,12 @@ def main() -> None:
     render_slides(prs, slides)
     prs.save(OUTPUT_PPTX)
     OUTPUT_SCRIPT.write_text(build_script_markdown(slides), encoding="utf-8")
-    exported = export_slide_pngs(OUTPUT_PPTX, PNG_DIR)
-    contact = build_contact_sheet(PNG_DIR, CONTACT_SHEET)
+    if options.skip_png_export:
+        print("PNG_EXPORT_SKIPPED: --skip-png-export set")
+        exported = False
+    else:
+        exported = export_slide_pngs(OUTPUT_PPTX, PNG_DIR)
+    contact = False if options.skip_contact_sheet else build_contact_sheet(PNG_DIR, CONTACT_SHEET)
     write_review_docs(slides, exported, contact)
     print(f"WROTE {OUTPUT_PPTX}")
     print(f"WROTE {OUTPUT_SCRIPT}")

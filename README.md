@@ -17,6 +17,13 @@ Run:
 python build_deck.py
 ```
 
+For environments without PowerPoint automation, build only the editable deck,
+script, and review docs:
+
+```powershell
+python build_deck.py --skip-png-export
+```
+
 Outputs:
 
 - `deck/April_peer_presentation.pptx`
